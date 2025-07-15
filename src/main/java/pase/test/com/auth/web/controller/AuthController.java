@@ -95,7 +95,7 @@ public class AuthController {
      * User logout endpoint
      */
     @PostMapping("/logout")
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN') or hasRole('MODERATOR')")
     @Timed(value = "auth.logout", description = "Time taken to process logout")
     public ResponseEntity<ApiResponse<Void>> logout(@RequestBody(required = false) LogoutRequest request) {
 
@@ -118,7 +118,7 @@ public class AuthController {
      * Get current user profile
      */
     @GetMapping("/profile")
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN') or hasRole('MODERATOR')")
     @Timed(value = "auth.profile", description = "Time taken to get user profile")
     public ResponseEntity<ApiResponse<Object>> getProfile() {
 
@@ -145,7 +145,7 @@ public class AuthController {
      * Validate token endpoint
      */
     @PostMapping("/validate")
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN') or hasRole('MODERATOR')")
     public ResponseEntity<ApiResponse<Object>> validateToken() {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

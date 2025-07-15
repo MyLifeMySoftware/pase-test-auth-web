@@ -30,9 +30,9 @@ public class DataInitializationService implements CommandLineRunner {
     public void run(String... args) throws Exception {
         log.info("Starting data initialization...");
 
-        //initializePermissions();
-        //initializeRoles();
-        //initializeUsers();
+        initializePermissions();
+        initializeRoles();
+        initializeUsers();
 
         log.info("Data initialization completed successfully");
     }
@@ -79,37 +79,42 @@ public class DataInitializationService implements CommandLineRunner {
 
         // Create USER role with basic permissions
         Role userRole = createRoleIfNotExists("USER", "Standard user role");
-        if (userRole.getPermissions() == null || userRole.getPermissions().isEmpty()) {
-            Set<UserPermission> userPermissions = new HashSet<>();
-            userPermissions.add(permissionRepository.findByName("user:read").orElseThrow());
-            userPermissions.add(permissionRepository.findByName("auth:login").orElseThrow());
-            userPermissions.add(permissionRepository.findByName("auth:logout").orElseThrow());
-            userPermissions.add(permissionRepository.findByName("auth:refresh").orElseThrow());
+        Set<UserPermission> userPermissions = new HashSet<>();
+        userPermissions.add(permissionRepository.findByName("user:read").orElse(null));
+        userPermissions.add(permissionRepository.findByName("auth:login").orElse(null));
+        userPermissions.add(permissionRepository.findByName("auth:logout").orElse(null));
+        userPermissions.add(permissionRepository.findByName("auth:refresh").orElse(null));
+        userPermissions.removeIf(java.util.Objects::isNull);
+
+        if (!userPermissions.isEmpty()) {
             userRole.setPermissions(userPermissions);
             roleRepository.save(userRole);
+            log.info("USER role updated with {} permissions", userPermissions.size());
         }
 
         // Create ADMIN role with all permissions
         Role adminRole = createRoleIfNotExists("ADMIN", "Administrator role with full access");
-        if (adminRole.getPermissions() == null || adminRole.getPermissions().isEmpty()) {
-            Set<UserPermission> adminPermissions = new HashSet<>(permissionRepository.findAll());
-            adminRole.setPermissions(adminPermissions);
-            roleRepository.save(adminRole);
-        }
+        Set<UserPermission> adminPermissions = new HashSet<>(permissionRepository.findAll());
+        adminRole.setPermissions(adminPermissions);
+        roleRepository.save(adminRole);
+        log.info("ADMIN role updated with {} permissions", adminPermissions.size());
 
         // Create MODERATOR role with moderate permissions
         Role moderatorRole = createRoleIfNotExists("MODERATOR", "Moderator role with limited admin access");
-        if (moderatorRole.getPermissions() == null || moderatorRole.getPermissions().isEmpty()) {
-            Set<UserPermission> moderatorPermissions = new HashSet<>();
-            moderatorPermissions.add(permissionRepository.findByName("user:read").orElseThrow());
-            moderatorPermissions.add(permissionRepository.findByName("user:write").orElseThrow());
-            moderatorPermissions.add(permissionRepository.findByName("role:read").orElseThrow());
-            moderatorPermissions.add(permissionRepository.findByName("permission:read").orElseThrow());
-            moderatorPermissions.add(permissionRepository.findByName("auth:login").orElseThrow());
-            moderatorPermissions.add(permissionRepository.findByName("auth:logout").orElseThrow());
-            moderatorPermissions.add(permissionRepository.findByName("auth:refresh").orElseThrow());
+        Set<UserPermission> moderatorPermissions = new HashSet<>();
+        moderatorPermissions.add(permissionRepository.findByName("user:read").orElse(null));
+        moderatorPermissions.add(permissionRepository.findByName("user:write").orElse(null));
+        moderatorPermissions.add(permissionRepository.findByName("role:read").orElse(null));
+        moderatorPermissions.add(permissionRepository.findByName("permission:read").orElse(null));
+        moderatorPermissions.add(permissionRepository.findByName("auth:login").orElse(null));
+        moderatorPermissions.add(permissionRepository.findByName("auth:logout").orElse(null));
+        moderatorPermissions.add(permissionRepository.findByName("auth:refresh").orElse(null));
+        moderatorPermissions.removeIf(java.util.Objects::isNull);
+
+        if (!moderatorPermissions.isEmpty()) {
             moderatorRole.setPermissions(moderatorPermissions);
             roleRepository.save(moderatorRole);
+            log.info("MODERATOR role updated with {} permissions", moderatorPermissions.size());
         }
 
         log.info("Roles initialized successfully");
@@ -123,74 +128,83 @@ public class DataInitializationService implements CommandLineRunner {
 
         // Create admin user
         if (!userRepository.existsByUsername("admin")) {
-            Role adminRole = roleRepository.findByName("ADMIN").orElseThrow();
+            Role adminRole = roleRepository.findByName("ADMIN").orElse(null);
+            if (adminRole != null) {
+                Set<Role> adminRoles = new HashSet<>();
+                adminRoles.add(adminRole);
 
-            Set<Role> adminRoles = new HashSet<>();
-            adminRoles.add(adminRole);
+                User admin = User.builder()
+                        .username("admin")
+                        .email("admin@pase.com")
+                        .password(passwordEncoder.encode("Admin123!"))
+                        .firstName("System")
+                        .lastName("Administrator")
+                        .enabled(true)
+                        .accountNonExpired(true)
+                        .accountNonLocked(true)
+                        .credentialsNonExpired(true)
+                        .roles(adminRoles)
+                        .build();
 
-            User admin = User.builder()
-                    .username("admin")
-                    .email("admin@pase.com")
-                    .password(passwordEncoder.encode("Admin123!"))
-                    .firstName("System")
-                    .lastName("Administrator")
-                    .enabled(true)
-                    .accountNonExpired(true)
-                    .accountNonLocked(true)
-                    .credentialsNonExpired(true)
-                    .roles(adminRoles)
-                    .build();
-
-            userRepository.save(admin);
-            log.info("Admin user created successfully");
+                userRepository.save(admin);
+                log.info("Admin user created successfully with role: {}", adminRole.getName());
+            } else {
+                log.error("ADMIN role not found, cannot create admin user");
+            }
         }
 
         // Create test user
         if (!userRepository.existsByUsername("testuser")) {
-            Role userRole = roleRepository.findByName("USER").orElseThrow();
+            Role userRole = roleRepository.findByName("USER").orElse(null);
+            if (userRole != null) {
+                Set<Role> userRoles = new HashSet<>();
+                userRoles.add(userRole);
 
-            Set<Role> userRoles = new HashSet<>();
-            userRoles.add(userRole);
+                User testUser = User.builder()
+                        .username("testuser")
+                        .email("test@pase.com")
+                        .password(passwordEncoder.encode("Test123!"))
+                        .firstName("Test")
+                        .lastName("User")
+                        .enabled(true)
+                        .accountNonExpired(true)
+                        .accountNonLocked(true)
+                        .credentialsNonExpired(true)
+                        .roles(userRoles)
+                        .build();
 
-            User testUser = User.builder()
-                    .username("testuser")
-                    .email("test@pase.com")
-                    .password(passwordEncoder.encode("Test123!"))
-                    .firstName("Test")
-                    .lastName("User")
-                    .enabled(true)
-                    .accountNonExpired(true)
-                    .accountNonLocked(true)
-                    .credentialsNonExpired(true)
-                    .roles(userRoles)
-                    .build();
-
-            userRepository.save(testUser);
-            log.info("Test user created successfully");
+                userRepository.save(testUser);
+                log.info("Test user created successfully with role: {}", userRole.getName());
+            } else {
+                log.error("USER role not found, cannot create test user");
+            }
         }
 
-        // Create moderator user
+        // create moderator user
         if (!userRepository.existsByUsername("moderator")) {
-            Role moderatorRole = roleRepository.findByName("MODERATOR").orElseThrow();
+            Role userRole = roleRepository.findByName("MODERATOR").orElse(null);
+            if (userRole != null) {
+                Set<Role> userRoles = new HashSet<>();
+                userRoles.add(userRole);
 
-            Set<Role> moderatorRoles = new HashSet<>();
-            moderatorRoles.add(moderatorRole);
+                User testUser = User.builder()
+                        .username("moderator")
+                        .email("moderator@pase.com")
+                        .password(passwordEncoder.encode("Mod123!"))
+                        .firstName("Moderator")
+                        .lastName("Dummy")
+                        .enabled(true)
+                        .accountNonExpired(true)
+                        .accountNonLocked(true)
+                        .credentialsNonExpired(true)
+                        .roles(userRoles)
+                        .build();
 
-            User moderator = User.builder()
-                    .username("moderator")
-                    .email("moderator@pase.com")
-                    .password(passwordEncoder.encode("Mod123!"))
-                    .firstName("System")
-                    .lastName("Moderator")
-                    .enabled(true)
-                    .accountNonExpired(true)
-                    .accountNonLocked(true)
-                    .credentialsNonExpired(true)
-                    .roles(moderatorRoles)
-                    .build();
-
-            userRepository.save(moderator);
-            log.info("Moderator user created successfully");
+                userRepository.save(testUser);
+                log.info("Test user created successfully with role: {}", userRole.getName());
+            } else {
+                log.error("USER role not found, cannot create test user");
+            }
         }
 
         log.info("Users initialized successfully");
@@ -211,6 +225,8 @@ public class DataInitializationService implements CommandLineRunner {
 
             permissionRepository.save(permission);
             log.debug("Created permission: {}", name);
+        } else {
+            log.debug("Permission already exists: {}", name);
         }
     }
 

@@ -8,9 +8,9 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import javax.crypto.SecretKey;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,9 +39,22 @@ public class JwtService {
      */
     public String generateAccessToken(UserDetails userDetails) {
         Map<String, Object> extraClaims = new HashMap<>();
-        extraClaims.put("authorities", userDetails.getAuthorities().stream()
+
+        List<String> allAuthorities = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.toList()));
+                .toList();
+
+        List<String> roles = allAuthorities.stream()
+                .filter(auth -> auth.startsWith("ROLE_"))
+                .toList();
+
+        List<String> permissions = allAuthorities.stream()
+                .filter(auth -> !auth.startsWith("ROLE_"))
+                .toList();
+
+        extraClaims.put("roles", roles);
+        extraClaims.put("permissions", permissions);
+        extraClaims.put("authorities", allAuthorities);
         extraClaims.put("type", "ACCESS");
 
         return generateToken(extraClaims, userDetails, accessTokenExpiration);
