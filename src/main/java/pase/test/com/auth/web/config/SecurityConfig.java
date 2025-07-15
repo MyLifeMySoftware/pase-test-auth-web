@@ -1,7 +1,7 @@
 package pase.test.com.auth.web.config;
 
-import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -24,6 +24,7 @@ import pase.test.com.auth.web.security.UserDetailsServiceImpl;
 import pase.test.com.auth.web.security.jwt.JwtAuthenticationEntryPoint;
 import pase.test.com.auth.web.security.jwt.JwtAuthenticationFilter;
 
+@Slf4j
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
@@ -34,60 +35,55 @@ public class SecurityConfig {
     private final UserDetailsServiceImpl userDetailsService;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
-    private static final String[] PUBLIC_URLS = {
-            "/api/v1/auth/login",
-            "/api/v1/auth/register",
-            "/api/v1/auth/refresh",
-            "/actuator/**",
-            "/swagger-ui/**",
-            "/v3/api-docs/**",
-            "/swagger-resources/**",
-            "/webjars/**",
-            "/favicon.ico",
-            "/error"
-    };
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        log.info("Configuring security filter chain...");
+
         http
-                // Disable CSRF for stateless authentication
                 .csrf(AbstractHttpConfigurer::disable)
-
-                // Configure CORS
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthenticationEntryPoint))
+                .authorizeHttpRequests(authz -> {
+                    log.info("Configuring authorization rules...");
+                    authz
+                            // Public endpoints
+                            .requestMatchers(
+                                    "/api/v1/auth/login",
+                                    "/api/v1/auth/register",
+                                    "/api/v1/auth/refresh",
+                                    "/api/v1/auth/health",
+                                    "/api/v1/test/**"
+                            ).permitAll()
 
-                // Configure session management
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                            // Swagger and OpenAPI docs
+                            .requestMatchers(
+                                    "/swagger-ui/**",
+                                    "/swagger-ui.html",
+                                    "/v3/api-docs/**",
+                                    "/swagger-resources/**",
+                                    "/webjars/**"
+                            ).permitAll()
 
-                // Configure authentication entry point
-                .exceptionHandling(exception -> exception
-                        .authenticationEntryPoint(jwtAuthenticationEntryPoint))
+                            // Actuator
+                            .requestMatchers("/actuator/**").permitAll()
 
-                // Configure authorization
-                .authorizeHttpRequests(authz -> authz
-                        // Public endpoints
-                        .requestMatchers(PUBLIC_URLS).permitAll()
+                            // Static resources
+                            .requestMatchers("/favicon.ico", "/error").permitAll()
 
-                        // Admin endpoints
-                        .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                            // OPTIONS for CORS
+                            .requestMatchers("OPTIONS").permitAll()
 
-                        // User management endpoints
-                        .requestMatchers("/api/v1/users/**").hasAnyRole("ADMIN", "USER")
+                            // Protected endpoints
+                            .requestMatchers("/api/v1/auth/logout", "/api/v1/auth/profile").authenticated()
 
-                        // Protected endpoints
-                        .requestMatchers("/api/v1/auth/logout").authenticated()
-                        .requestMatchers("/api/v1/auth/profile").authenticated()
-
-                        // All other requests must be authenticated
-                        .anyRequest().authenticated())
-
-                // Set authentication provider
+                            // All other requests
+                            .anyRequest().authenticated();
+                })
                 .authenticationProvider(authenticationProvider())
-
-                // Add JWT filter
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
+        log.info("Security filter chain configured successfully");
         return http.build();
     }
 
@@ -101,7 +97,6 @@ public class SecurityConfig {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
         authProvider.setUserDetailsService(userDetailsService);
         authProvider.setPasswordEncoder(passwordEncoder());
-        authProvider.setHideUserNotFoundExceptions(false);
         return authProvider;
     }
 
@@ -113,42 +108,14 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-
-        // Allow specific origins in production
-        configuration.setAllowedOriginPatterns(Arrays.asList("*"));
-
-        // Allow specific methods
-        configuration.setAllowedMethods(Arrays.asList(
-                "GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"
-        ));
-
-        // Allow specific headers
-        configuration.setAllowedHeaders(Arrays.asList(
-                "Authorization",
-                "Content-Type",
-                "X-Requested-With",
-                "Accept",
-                "Origin",
-                "Access-Control-Request-Method",
-                "Access-Control-Request-Headers"
-        ));
-
-        // Expose headers to client
-        configuration.setExposedHeaders(Arrays.asList(
-                "Authorization",
-                "Access-Control-Allow-Origin",
-                "Access-Control-Allow-Credentials"
-        ));
-
-        // Allow credentials
+        configuration.setAllowedOriginPatterns(java.util.List.of("*"));
+        configuration.setAllowedMethods(java.util.List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+        configuration.setAllowedHeaders(java.util.List.of("*"));
         configuration.setAllowCredentials(true);
-
-        // Cache preflight response for 1 hour
         configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
-
         return source;
     }
 }

@@ -34,6 +34,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
 
+        // Check if this request should be filtered
+        if (shouldNotFilter(request)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         final String authHeader = request.getHeader("Authorization");
         final String jwt;
         final String username;
@@ -110,9 +116,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         String path = request.getRequestURI();
+        String method = request.getMethod();
 
         // Skip JWT validation for public endpoints
-        return path.startsWith("/api/v1/auth/login") ||
+        boolean isPublicEndpoint = path.startsWith("/api/v1/auth/login") ||
                 path.startsWith("/api/v1/auth/register") ||
                 path.startsWith("/api/v1/auth/refresh") ||
                 path.startsWith("/api/v1/auth/health") ||
@@ -122,5 +129,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 path.equals("/favicon.ico") ||
                 path.equals("/") ||
                 path.startsWith("/error");
+
+        // Allow OPTIONS requests (CORS preflight)
+        if ("OPTIONS".equalsIgnoreCase(method)) {
+            return true;
+        }
+
+        log.debug("Path: {}, Method: {}, isPublic: {}", path, method, isPublicEndpoint);
+
+        return isPublicEndpoint;
     }
 }
