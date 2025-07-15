@@ -5,7 +5,7 @@
 
 	<groupId>pase.test.com</groupId>
 	<artifactId>pase-test-auth-web</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0-SNAPSHOT</version>
 	<name>pase-test-auth-web</name>
 	<description>Auth Microservice</description>
 

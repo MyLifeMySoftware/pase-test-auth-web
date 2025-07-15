@@ -120,16 +120,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String method = request.getMethod();
 
         // Skip JWT validation for public endpoints
-        boolean isPublicEndpoint = path.startsWith("/api/v1/auth/login") ||
-                path.startsWith("/api/v1/auth/register") ||
-                path.startsWith("/api/v1/auth/refresh") ||
-                path.startsWith("/api/v1/auth/health") ||
-                path.startsWith("/actuator") ||
-                path.startsWith("/swagger-ui") ||
-                path.startsWith("/v3/api-docs") ||
-                path.equals("/favicon.ico") ||
-                path.equals("/") ||
-                path.startsWith("/error");
+        boolean isPublicEndpoint = path.startsWith("/api/v1/auth/login")
+                || path.startsWith("/api/v1/auth/register")
+                || path.startsWith("/api/v1/auth/refresh")
+                || path.startsWith("/api/v1/auth/health")
+                || path.startsWith("/actuator")
+                || path.startsWith("/swagger-ui")
+                || path.startsWith("/v3/api-docs")
+                || path.equals("/favicon.ico")
+                || path.equals("/")
+                || path.startsWith("/error");
 
         // Allow OPTIONS requests (CORS preflight)
         if ("OPTIONS".equalsIgnoreCase(method)) {
