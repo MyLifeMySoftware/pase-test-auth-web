@@ -99,7 +99,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     // Set authentication in security context
                     SecurityContextHolder.getContext().setAuthentication(authToken);
 
-                    log.debug("User {} authenticated successfully via JWT", username);
+                    log.debug("User {} authenticated successfully via JWT with authorities: {}",
+                            username, authorities);
                 } else {
                     log.debug("JWT token is invalid for user: {}", username);
                 }
