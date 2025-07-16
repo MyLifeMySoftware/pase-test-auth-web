@@ -37,9 +37,6 @@ public class DataInitializationService implements CommandLineRunner {
         log.info("Data initialization completed successfully");
     }
 
-    /**
-     * Initialize default permissions
-     */
     private void initializePermissions() {
         log.info("Initializing permissions...");
 
@@ -71,9 +68,6 @@ public class DataInitializationService implements CommandLineRunner {
         log.info("Permissions initialized successfully");
     }
 
-    /**
-     * Initialize default roles
-     */
     private void initializeRoles() {
         log.info("Initializing roles...");
 
@@ -120,9 +114,6 @@ public class DataInitializationService implements CommandLineRunner {
         log.info("Roles initialized successfully");
     }
 
-    /**
-     * Initialize default users
-     */
     private void initializeUsers() {
         log.info("Initializing users...");
 
@@ -210,9 +201,6 @@ public class DataInitializationService implements CommandLineRunner {
         log.info("Users initialized successfully");
     }
 
-    /**
-     * Create permission if it doesn't exist
-     */
     private void createPermissionIfNotExists(String name, String description, String resource, String action) {
         if (!permissionRepository.existsByName(name)) {
             UserPermission permission = UserPermission.builder()
@@ -230,9 +218,6 @@ public class DataInitializationService implements CommandLineRunner {
         }
     }
 
-    /**
-     * Create role if it doesn't exist
-     */
     private Role createRoleIfNotExists(String name, String description) {
         return roleRepository.findByName(name).orElseGet(() -> {
             Role role = Role.builder()

@@ -43,7 +43,7 @@ public class AuthService {
     private final UserDetailsServiceImpl userDetailsService;
 
     /**
-     * Authenticate user and generate tokens
+     * Authenticate user and generate tokens.
      */
     @Transactional
     public AuthResponse login(LoginRequest request, String ipAddress, String userAgent) {
@@ -92,7 +92,7 @@ public class AuthService {
     }
 
     /**
-     * Register new user
+     * Register new user.
      */
     @Transactional
     public AuthResponse register(RegisterRequest request, String ipAddress, String userAgent) {
@@ -154,15 +154,15 @@ public class AuthService {
     }
 
     /**
-     * Refresh access token using refresh token
+     * Refresh access token using refresh token.
      */
     @Transactional
     public AuthResponse refreshToken(RefreshTokenRequest request, String ipAddress, String userAgent) {
         log.info("Attempting to refresh token");
 
         // Validate refresh token format
-        if (!jwtService.validateTokenStructure(request.getRefreshToken()) ||
-                !jwtService.isRefreshToken(request.getRefreshToken())) {
+        if (!jwtService.validateTokenStructure(request.getRefreshToken())
+                || !jwtService.isRefreshToken(request.getRefreshToken())) {
             throw new InvalidRefreshTokenException("Invalid refresh token format");
         }
 
@@ -207,7 +207,7 @@ public class AuthService {
     }
 
     /**
-     * Logout user and revoke tokens
+     * Logout user and revoke tokens.
      */
     @Transactional
     public void logout(String refreshToken, String username) {
@@ -228,7 +228,7 @@ public class AuthService {
     }
 
     /**
-     * Logout from all devices
+     * Logout from all devices.
      */
     @Transactional
     public void logoutFromAllDevices(String username) {
@@ -243,7 +243,7 @@ public class AuthService {
     }
 
     /**
-     * Save refresh token to database
+     * Save refresh token to database.
      */
     private void saveRefreshToken(User user, String token, String ipAddress, String userAgent) {
         LocalDateTime expiresAt = jwtService.getTokenExpirationAsLocalDateTime(token);
@@ -261,7 +261,7 @@ public class AuthService {
     }
 
     /**
-     * Clean up expired tokens (scheduled task)
+     * Clean up expired tokens (scheduled task).
      */
     @Transactional
     public void cleanupExpiredTokens() {

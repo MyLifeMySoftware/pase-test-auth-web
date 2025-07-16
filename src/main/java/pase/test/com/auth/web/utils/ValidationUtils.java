@@ -23,45 +23,47 @@ public class ValidationUtils {
     );
 
     /**
-     * Validate email format
+     * Validate email format.
      */
     public static boolean isValidEmail(String email) {
         return email != null && EMAIL_PATTERN.matcher(email).matches();
     }
 
     /**
-     * Validate username format
+     * Validate username format.
      */
     public static boolean isValidUsername(String username) {
         return username != null && USERNAME_PATTERN.matcher(username).matches();
     }
 
     /**
-     * Validate password strength
+     * Validate password strength.
      */
     public static boolean isValidPassword(String password) {
         return password != null && PASSWORD_PATTERN.matcher(password).matches();
     }
 
     /**
-     * Validate name format
+     * Validate name format.
      */
     public static boolean isValidName(String name) {
         return name != null && NAME_PATTERN.matcher(name).matches();
     }
 
     /**
-     * Check if string is null or empty
+     * Check if string is null or empty.
      */
     public static boolean isNullOrEmpty(String str) {
         return str == null || str.trim().isEmpty();
     }
 
     /**
-     * Check if string length is within bounds
+     * Check if string length is within bounds.
      */
     public static boolean isLengthValid(String str, int min, int max) {
-        if (str == null) return false;
+        if (str == null) {
+            return false;
+        }
         int length = str.length();
         return length >= min && length <= max;
     }

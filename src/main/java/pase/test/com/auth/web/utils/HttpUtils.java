@@ -22,7 +22,7 @@ public class HttpUtils {
     };
 
     /**
-     * Get client IP address from HTTP request
+     * Get client IP address from HTTP request.
      */
     public static String getClientIpAddress(HttpServletRequest request) {
         for (String header : IP_HEADER_NAMES) {
@@ -39,7 +39,7 @@ public class HttpUtils {
     }
 
     /**
-     * Get user agent from HTTP request
+     * Get user agent from HTTP request.
      */
     public static String getUserAgent(HttpServletRequest request) {
         String userAgent = request.getHeader("User-Agent");
@@ -47,18 +47,18 @@ public class HttpUtils {
     }
 
     /**
-     * Check if request is from mobile device
+     * Check if request is from mobile device.
      */
     public static boolean isMobileDevice(HttpServletRequest request) {
         String userAgent = getUserAgent(request).toLowerCase();
-        return userAgent.contains("mobile") ||
-                userAgent.contains("android") ||
-                userAgent.contains("iphone") ||
-                userAgent.contains("ipad");
+        return userAgent.contains("mobile")
+                || userAgent.contains("android")
+                || userAgent.contains("iphone")
+                || userAgent.contains("ipad");
     }
 
     /**
-     * Get request origin
+     * Get request origin.
      */
     public static String getRequestOrigin(HttpServletRequest request) {
         String origin = request.getHeader("Origin");

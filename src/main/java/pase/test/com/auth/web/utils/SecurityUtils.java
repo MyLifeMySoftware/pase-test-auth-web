@@ -10,7 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 public class SecurityUtils {
 
     /**
-     * Get current authenticated user
+     * Get current authenticated user.
      */
     public static Optional<String> getCurrentUsername() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -31,7 +31,7 @@ public class SecurityUtils {
     }
 
     /**
-     * Get current authentication
+     * Get current authentication.
      */
     public static Optional<Authentication> getCurrentAuthentication() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -44,7 +44,7 @@ public class SecurityUtils {
     }
 
     /**
-     * Check if user has specific role
+     * Check if user has specific role.
      */
     public static boolean hasRole(String role) {
         return getCurrentAuthentication()
@@ -54,7 +54,7 @@ public class SecurityUtils {
     }
 
     /**
-     * Check if user has specific authority
+     * Check if user has specific authority.
      */
     public static boolean hasAuthority(String authority) {
         return getCurrentAuthentication()
@@ -64,7 +64,7 @@ public class SecurityUtils {
     }
 
     /**
-     * Check if current user is authenticated
+     * Check if current user is authenticated.
      */
     public static boolean isAuthenticated() {
         return getCurrentAuthentication().isPresent();

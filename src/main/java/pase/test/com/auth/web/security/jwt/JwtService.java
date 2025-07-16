@@ -35,7 +35,7 @@ public class JwtService {
     private String issuer;
 
     /**
-     * Generate access token with user details and claims
+     * Generate access token with user details and claims.
      */
     public String generateAccessToken(UserDetails userDetails) {
         Map<String, Object> extraClaims = new HashMap<>();
@@ -61,7 +61,7 @@ public class JwtService {
     }
 
     /**
-     * Generate refresh token
+     * Generate refresh token.
      */
     public String generateRefreshToken(UserDetails userDetails) {
         Map<String, Object> extraClaims = new HashMap<>();
@@ -71,7 +71,7 @@ public class JwtService {
     }
 
     /**
-     * Generate token with extra claims
+     * Generate token with extra claims.
      */
     public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails, long expiration) {
         Date now = new Date();
@@ -88,21 +88,21 @@ public class JwtService {
     }
 
     /**
-     * Extract username from token
+     * Extract username from token.
      */
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
     /**
-     * Extract expiration date from token
+     * Extract expiration date from token.
      */
     public Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
 
     /**
-     * Extract authorities from token
+     * Extract authorities from token.
      */
     @SuppressWarnings("unchecked")
     public java.util.List<String> extractAuthorities(String token) {
@@ -110,14 +110,14 @@ public class JwtService {
     }
 
     /**
-     * Extract token type
+     * Extract token type.
      */
     public String extractTokenType(String token) {
         return extractClaim(token, claims -> (String) claims.get("type"));
     }
 
     /**
-     * Extract claim from token
+     * Extract claim from token.
      */
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
@@ -125,7 +125,7 @@ public class JwtService {
     }
 
     /**
-     * Extract all claims from token
+     * Extract all claims from token.
      */
     private Claims extractAllClaims(String token) {
         try {
@@ -141,7 +141,7 @@ public class JwtService {
     }
 
     /**
-     * Check if token is valid
+     * Check if token is valid.
      */
     public boolean isTokenValid(String token, UserDetails userDetails) {
         try {
@@ -154,7 +154,7 @@ public class JwtService {
     }
 
     /**
-     * Check if token is expired
+     * Check if token is expired.
      */
     public boolean isTokenExpired(String token) {
         try {
@@ -166,7 +166,7 @@ public class JwtService {
     }
 
     /**
-     * Check if token is access token
+     * Check if token is access token.
      */
     public boolean isAccessToken(String token) {
         try {
@@ -178,7 +178,7 @@ public class JwtService {
     }
 
     /**
-     * Check if token is refresh token
+     * Check if token is refresh token.
      */
     public boolean isRefreshToken(String token) {
         try {
@@ -190,7 +190,7 @@ public class JwtService {
     }
 
     /**
-     * Get token expiration as LocalDateTime
+     * Get token expiration as LocalDateTime.
      */
     public LocalDateTime getTokenExpirationAsLocalDateTime(String token) {
         Date expiration = extractExpiration(token);
@@ -198,7 +198,7 @@ public class JwtService {
     }
 
     /**
-     * Get signing key
+     * Get signing key.
      */
     private SecretKey getSigningKey() {
         byte[] keyBytes = secretKey.getBytes();
@@ -206,7 +206,7 @@ public class JwtService {
     }
 
     /**
-     * Validate token format and structure
+     * Validate token format and structure.
      */
     public boolean validateTokenStructure(String token) {
         try {
