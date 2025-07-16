@@ -33,9 +33,6 @@ public class AuthController {
 
     private final AuthService authService;
 
-    /**
-     * User login endpoint
-     */
     @PostMapping("/login")
     @Timed(value = "auth.login", description = "Time taken to process login")
     public ResponseEntity<ApiResponse<AuthResponse>> login(
@@ -52,9 +49,6 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.success("Login successful", authResponse));
     }
 
-    /**
-     * User registration endpoint
-     */
     @PostMapping("/register")
     @Timed(value = "auth.register", description = "Time taken to process registration")
     public ResponseEntity<ApiResponse<AuthResponse>> register(
@@ -72,9 +66,6 @@ public class AuthController {
                 .body(ApiResponse.success("Registration successful", authResponse));
     }
 
-    /**
-     * Refresh token endpoint
-     */
     @PostMapping("/refresh")
     @Timed(value = "auth.refresh", description = "Time taken to refresh token")
     public ResponseEntity<ApiResponse<AuthResponse>> refreshToken(
@@ -91,9 +82,6 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.success("Token refreshed successfully", authResponse));
     }
 
-    /**
-     * User logout endpoint
-     */
     @PostMapping("/logout")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN') or hasRole('MODERATOR')")
     @Timed(value = "auth.logout", description = "Time taken to process logout")
@@ -114,9 +102,6 @@ public class AuthController {
         }
     }
 
-    /**
-     * Get current user profile
-     */
     @GetMapping("/profile")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN') or hasRole('MODERATOR')")
     @Timed(value = "auth.profile", description = "Time taken to get user profile")
@@ -133,17 +118,11 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.success("Profile retrieved successfully", profileData));
     }
 
-    /**
-     * Health check endpoint
-     */
     @GetMapping("/health")
     public ResponseEntity<ApiResponse<String>> health() {
         return ResponseEntity.ok(ApiResponse.success("Auth service is running", "OK"));
     }
 
-    /**
-     * Validate token endpoint
-     */
     @PostMapping("/validate")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN') or hasRole('MODERATOR')")
     public ResponseEntity<ApiResponse<Object>> validateToken() {
